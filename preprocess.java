@@ -27,7 +27,7 @@ import net.lingala.zip4j.ZipFile;
 public class preprocess {
 
 
-    static final String CSV_FILE_NAME = "ch.swisstopo.swisssurface3d-dev.csv";
+    static final String CSV_FILE_NAME = "ch.swisstopo.swisssurface3d-25fwj1Iq.csv";
     static final String TMP_DIRECTORY = "/tmp/";
     static final String ZIP_DIRECTORY = System.getProperty("user.home")+"/tmp/zip";
     static final String LAZ_DIRECTORY = System.getProperty("user.home")+"/tmp/laz";
@@ -45,7 +45,7 @@ public class preprocess {
             fileLocations = lines.collect(Collectors.toList());
         }
 
-        int maxThreads = 10; 
+        int maxThreads = 24; 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
 
         for (String fileLocation : fileLocations) {
@@ -56,7 +56,7 @@ public class preprocess {
             executor.execute(() -> {
                 try {
                     makeitso(fileLocation);
-                } catch (IOException | URISyntaxException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
