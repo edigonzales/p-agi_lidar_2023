@@ -1,0 +1,13 @@
+{
+    "pipeline": [
+        {
+            "type": "readers.las",
+            "filename": "/Users/stefan/tmp/zip/2592_1228.las"
+        },
+        {
+            "type": "writers.las",
+            "filename": "/Users/stefan/tmp/laz/2592_1228.laz",
+            "compression": "laszip"
+        }
+    ]
+}
