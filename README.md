@@ -1,5 +1,7 @@
 # p-agi_lidar_2023
 
+Linux: https://docs.anaconda.com/free/miniconda/
+
 ```
 conda create --name pdal-java
 ```
@@ -14,6 +16,13 @@ conda install -c conda-forge pdal=2.6.2 python-pdal gdal
 ```
 conda install -c conda-forge pdal=2.6.3 python-pdal gdal
 ```
+
+```
+nohup jbang preproces.java > log.log 2>&1 &
+```
+
+
+
 
 
 ```

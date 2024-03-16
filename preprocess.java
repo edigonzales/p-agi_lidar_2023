@@ -45,7 +45,7 @@ public class preprocess {
             fileLocations = lines.collect(Collectors.toList());
         }
 
-        int maxThreads = 1; 
+        int maxThreads = 10; 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
 
         for (String fileLocation : fileLocations) {
