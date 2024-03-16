@@ -45,8 +45,7 @@ public class preprocess {
             fileLocations = lines.collect(Collectors.toList());
         }
 
-        int maxThreads = 3; 
-
+        int maxThreads = 1; 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
 
         for (String fileLocation : fileLocations) {
@@ -298,6 +297,7 @@ public class preprocess {
 
         Files.delete(Paths.get(zipFile.getAbsolutePath()));
         Files.delete(Paths.get(lasFile));
+        Files.delete(Paths.get(lazFile));
         Files.delete(Paths.get(dsmOrigFile));
         Files.delete(Paths.get(dtmOrigFile));
     }
