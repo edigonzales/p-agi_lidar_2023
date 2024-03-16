@@ -18,7 +18,7 @@ conda install -c conda-forge pdal=2.6.3 python-pdal gdal
 ```
 
 ```
-nohup jbang preproces.java > log.log 2>&1 &
+nohup jbang preprocess.java > log.log 2>&1 &
 ```
 
 

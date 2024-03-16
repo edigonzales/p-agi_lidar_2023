@@ -45,7 +45,7 @@ public class preprocess {
             fileLocations = lines.collect(Collectors.toList());
         }
 
-        int maxThreads = 24; 
+        int maxThreads = 1; 
         ExecutorService executor = Executors.newFixedThreadPool(maxThreads);
 
         for (String fileLocation : fileLocations) {
@@ -60,10 +60,7 @@ public class preprocess {
                     e.printStackTrace();
                 }
             });
-            
-
         }
-
         executor.shutdown();
     }
 
@@ -134,10 +131,10 @@ public class preprocess {
                 err.println(e.getMessage());
         }
 
-        String dsmFillNoDataFile = Paths.get(DSM_DIRECTORY, "filled_no_data_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
-        err.println("-- fill no data");
+        String dsmFillNoDataUncompressedFile = Paths.get(DSM_DIRECTORY, "filled_no_data_uncompressed_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
+        err.println("-- fill no data dsm");
         try {
-            String cmd = "gdal_fillnodata.py -md 100 -si 2 "+dsmOrigFile+" "+dsmFillNoDataFile;
+            String cmd = "gdal_fillnodata.py -md 100 -si 2 "+dsmOrigFile+" "+dsmFillNoDataUncompressedFile;
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
@@ -157,10 +154,33 @@ public class preprocess {
                 err.println(e.getMessage());
         }
 
+        String dsmFillNoDataFile = Paths.get(DSM_DIRECTORY, "filled_no_data_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
+        err.println("-- compress dsm");
+        try {
+            String cmd = "gdal_translate -co TILED=YES -co COMPRESS=DEFLATE -co PREDICTOR=2 " + dsmFillNoDataUncompressedFile + " " + dsmFillNoDataFile;
+            err.println(cmd);
+            ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
+            Process p = pb.start();
+            {
+                BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line = null;
+                while ((line = is.readLine()) != null)
+                    err.println(line);
+                p.waitFor();
+            }
+            
+            if (p.exitValue() != 0) {
+                err.println("Error while processing: " + dsmFillNoDataFile);
+            }
+        } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                err.println(e.getMessage());
+        }
+
         String dsmShadedReliefFile = Paths.get(DSM_SHADED_RELIEF_DIRECTORY, lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
         err.println("-- hillshade dsm");
         try {
-            String cmd = "gdaldem hillshade "+dsmFillNoDataFile+" "+dsmShadedReliefFile+" -compute_edges -alt 55 -multidirectional";
+            String cmd = "gdaldem hillshade "+dsmFillNoDataFile+" "+dsmShadedReliefFile+" -compute_edges -alt 55 -multidirectional -co TILED=YES -co COMPRESS=DEFLATE -co PREDICTOR=2";
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
@@ -203,10 +223,10 @@ public class preprocess {
                 err.println(e.getMessage());
         }
 
-        String dtmFillNoDataFile = Paths.get(DTM_DIRECTORY, "filled_no_data_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
+        String dtmFillNoDataUncompressedFile = Paths.get(DTM_DIRECTORY, "filled_no_data_uncompressed_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
         err.println("-- fill no data dtm");
         try {
-            String cmd = "gdal_fillnodata.py -md 500 -si 2 "+dtmOrigFile+" "+dtmFillNoDataFile;
+            String cmd = "gdal_fillnodata.py -md 500 -si 2 "+dtmOrigFile+" "+dtmFillNoDataUncompressedFile;
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
@@ -226,10 +246,33 @@ public class preprocess {
                 err.println(e.getMessage());
         }
 
+        String dtmFillNoDataFile = Paths.get(DTM_DIRECTORY, "filled_no_data_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
+        err.println("-- compress dtm");
+        try {
+            String cmd = "gdal_translate -co TILED=YES -co COMPRESS=DEFLATE -co PREDICTOR=2 " + dtmFillNoDataUncompressedFile + " " + dtmFillNoDataFile;
+            err.println(cmd);
+            ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
+            Process p = pb.start();
+            {
+                BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line = null;
+                while ((line = is.readLine()) != null)
+                    err.println(line);
+                p.waitFor();
+            }
+            
+            if (p.exitValue() != 0) {
+                err.println("Error while processing: " + dtmFillNoDataFile);
+            }
+        } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                err.println(e.getMessage());
+        }
+
         String dtmShadedReliefFile = Paths.get(DTM_SHADED_RELIEF_DIRECTORY, lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
         err.println("-- hillshade dtm");
         try {
-            String cmd = "gdaldem hillshade "+dtmFillNoDataFile+" "+dtmShadedReliefFile+" -compute_edges -alt 50 -multidirectional";
+            String cmd = "gdaldem hillshade "+dtmFillNoDataFile+" "+dtmShadedReliefFile+" -compute_edges -alt 50 -multidirectional -co TILED=YES -co COMPRESS=DEFLATE -co PREDICTOR=2";
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
@@ -299,6 +342,8 @@ public class preprocess {
         Files.delete(Paths.get(lasFile));
         Files.delete(Paths.get(lazFile));
         Files.delete(Paths.get(dsmOrigFile));
+        Files.delete(Paths.get(dsmFillNoDataUncompressedFile));
+        Files.delete(Paths.get(dtmFillNoDataUncompressedFile));
         Files.delete(Paths.get(dtmOrigFile));
     }
 }
