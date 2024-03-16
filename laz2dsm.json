@@ -1,0 +1,22 @@
+{
+    "pipeline": [
+        {
+            "type": "readers.las",
+            "filename": "input.laz"
+        },
+        {
+            "type":"filters.expression",
+            "expression":"Classification > 1"
+        }, 
+        {
+            "type":"writers.gdal",
+            "filename":"output.tif",
+            "data_type":"float",
+            "output_type":"mean",
+            "resolution":0.25,
+            "bounds":"([2590500.00,2590999.75],[1254000.00,1254499.75])",
+            "gdalopts":"TILED=YES,COMPRESS=DEFLATE,PREDICTOR=2",
+            "override_srs":"EPSG:2056"
+        }
+    ]
+}

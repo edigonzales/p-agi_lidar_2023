@@ -2,12 +2,13 @@
     "pipeline": [
         {
             "type": "readers.las",
-            "filename": "/Users/stefan/tmp/zip/2592_1228.las"
+            "filename": "input.las"
         },
         {
             "type": "writers.las",
-            "filename": "/Users/stefan/tmp/laz/2592_1228.laz",
-            "compression": "laszip"
+            "filename": "output.laz",
+            "compression": "laszip",
+            "a_srs":"EPSG:2056"
         }
     ]
 }

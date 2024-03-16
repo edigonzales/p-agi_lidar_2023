@@ -9,8 +9,12 @@ conda activate pdal-java
 ```
 
 ```
-conda install -c conda-forge pdal=2.6.2 gdal
+conda install -c conda-forge pdal=2.6.2 python-pdal gdal
 ```
+```
+conda install -c conda-forge pdal=2.6.3 python-pdal gdal
+```
+
 
 ```
 sudo ln -s miniconda3 miniconda
