@@ -107,8 +107,8 @@ public class preprocess {
         String dsmOrigFile = Paths.get(DSM_DIRECTORY, "orig_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
         Double minE = Double.valueOf(lasFileName.substring(0, 4) + "000");
         Double minN = Double.valueOf(lasFileName.substring(5, 9) + "000");
-        Double maxE = minE + 1000 - 0.5;
-        Double maxN = minN + 1000 - 0.5;            
+        Double maxE = minE + 1000 - 0.25;
+        Double maxN = minN + 1000 - 0.25;            
         String bounds = "(["+minE.toString()+","+maxE.toString()+"],["+minN.toString()+","+maxN.toString()+"])"; 
         err.println("-- laz2dsm: " + lasFile);
         try {
