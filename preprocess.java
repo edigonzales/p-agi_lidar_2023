@@ -34,6 +34,7 @@ public class preprocess {
     static final String DSM_DIRECTORY = System.getProperty("user.home")+"/tmp/dsm";
     static final String DSM_SHADED_RELIEF_DIRECTORY = System.getProperty("user.home")+"/tmp/dsm_shaded_relief";
     static final String DTM_DIRECTORY = System.getProperty("user.home")+"/tmp/dtm";
+    static final String DTM_SLOPE_DIRECTORY = System.getProperty("user.home")+"/tmp/dtm_slope";
     static final String DTM_SHADED_RELIEF_DIRECTORY = System.getProperty("user.home")+"/tmp/dtm_shaded_relief";
     static final String NDSM_BUILDINGS_DIRECTORY = System.getProperty("user.home")+"/tmp/ndsm_buildings";
     static final String NDSM_VEGETATION_DIRECTORY = System.getProperty("user.home")+"/tmp/ndsm_vegetation";
@@ -106,8 +107,8 @@ public class preprocess {
         String dsmOrigFile = Paths.get(DSM_DIRECTORY, "orig_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
         Double minE = Double.valueOf(lasFileName.substring(0, 4) + "000");
         Double minN = Double.valueOf(lasFileName.substring(5, 9) + "000");
-        Double maxE = minE + 1000 - 0.25;
-        Double maxN = minN + 1000 - 0.25;            
+        Double maxE = minE + 1000 - 0.5;
+        Double maxN = minN + 1000 - 0.5;            
         String bounds = "(["+minE.toString()+","+maxE.toString()+"],["+minN.toString()+","+maxN.toString()+"])"; 
         err.println("-- laz2dsm: " + lasFile);
         try {
@@ -134,7 +135,7 @@ public class preprocess {
         String dsmFillNoDataUncompressedFile = Paths.get(DSM_DIRECTORY, "filled_no_data_uncompressed_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
         err.println("-- fill no data dsm");
         try {
-            String cmd = "gdal_fillnodata.py -md 100 -si 2 "+dsmOrigFile+" "+dsmFillNoDataUncompressedFile;
+            String cmd = "gdal_fillnodata.py -md 500 -si 2 "+dsmOrigFile+" "+dsmFillNoDataUncompressedFile;
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
@@ -273,6 +274,29 @@ public class preprocess {
         err.println("-- hillshade dtm");
         try {
             String cmd = "gdaldem hillshade "+dtmFillNoDataFile+" "+dtmShadedReliefFile+" -compute_edges -alt 50 -multidirectional -co TILED=YES -co COMPRESS=DEFLATE -co PREDICTOR=2";
+            err.println(cmd);
+            ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
+            Process p = pb.start();
+            {
+                BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line = null;
+                while ((line = is.readLine()) != null)
+                    err.println(line);
+                p.waitFor();
+            }
+            
+            if (p.exitValue() != 0) {
+                err.println("Error while processing: " + dtmFillNoDataFile);
+            }
+        } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                err.println(e.getMessage());
+        }
+
+        String dtmSlopeFile = Paths.get(DTM_SLOPE_DIRECTORY, lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
+        err.println("-- hillshade dtm");
+        try {
+            String cmd = "gdaldem slope "+dtmFillNoDataFile+" "+dtmSlopeFile+" -compute_edges -co TILED=YES -co COMPRESS=DEFLATE -co PREDICTOR=2";
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
