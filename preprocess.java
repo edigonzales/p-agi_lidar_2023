@@ -81,9 +81,37 @@ public class preprocess {
 
         String lasFile = Paths.get(ZIP_DIRECTORY, lasFileName).toFile().getAbsolutePath();
         String lazFile = Paths.get(LAZ_DIRECTORY, lasFileName.replace(".las", ".laz")).toFile().getAbsolutePath();
-        err.println("-- las2laz: " + lasFile);
+        // err.println("-- las2laz: " + lasFile);
+        // try {
+        //     String cmd = "pdal pipeline las2laz.json --readers.las.filename="+lasFile+" --writers.las.filename="+lazFile;
+        //     err.println(cmd);
+        //     ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
+        //     Process p = pb.start();
+        //     {
+        //         BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        //         String line = null;
+        //         while ((line = is.readLine()) != null)
+        //             err.println(line);
+        //         p.waitFor();
+        //     }
+            
+        //     if (p.exitValue() != 0) {
+        //         err.println("Error while processing: " + lasFile);
+        //     }
+        // } catch (IOException | InterruptedException e) {
+        //         e.printStackTrace();
+        //         err.println(e.getMessage());
+        // }
+
+        String dsmOrigFile = Paths.get(DSM_DIRECTORY, "orig_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
+        Double minE = Double.valueOf(lasFileName.substring(0, 4) + "000");
+        Double minN = Double.valueOf(lasFileName.substring(5, 9) + "000");
+        Double maxE = minE + 1000 - 0.25;
+        Double maxN = minN + 1000 - 0.25;            
+        String bounds = "(["+minE.toString()+","+maxE.toString()+"],["+minN.toString()+","+maxN.toString()+"])"; 
+        err.println("-- laz2dsm: " + lasFile);
         try {
-            String cmd = "pdal pipeline las2laz.json --readers.las.filename="+lasFile+" --writers.las.filename="+lazFile;
+            String cmd = "pdal pipeline laz2dsm.json --readers.las.filename="+lasFile+" --writers.gdal.filename="+dsmOrigFile+" --writers.gdal.bounds="+bounds;
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
@@ -97,34 +125,6 @@ public class preprocess {
             
             if (p.exitValue() != 0) {
                 err.println("Error while processing: " + lasFile);
-            }
-        } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-                err.println(e.getMessage());
-        }
-
-        String dsmOrigFile = Paths.get(DSM_DIRECTORY, "orig_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
-        Double minE = Double.valueOf(lasFileName.substring(0, 4) + "000");
-        Double minN = Double.valueOf(lasFileName.substring(5, 9) + "000");
-        Double maxE = minE + 1000 - 0.25;
-        Double maxN = minN + 1000 - 0.25;            
-        String bounds = "(["+minE.toString()+","+maxE.toString()+"],["+minN.toString()+","+maxN.toString()+"])"; 
-        err.println("-- laz2dsm: " + lazFile);
-        try {
-            String cmd = "pdal pipeline laz2dsm.json --readers.las.filename="+lazFile+" --writers.gdal.filename="+dsmOrigFile+" --writers.gdal.bounds="+bounds;
-            err.println(cmd);
-            ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
-            Process p = pb.start();
-            {
-                BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                String line = null;
-                while ((line = is.readLine()) != null)
-                    err.println(line);
-                p.waitFor();
-            }
-            
-            if (p.exitValue() != 0) {
-                err.println("Error while processing: " + lazFile);
             }
         } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -201,9 +201,9 @@ public class preprocess {
         }
 
         String dtmOrigFile = Paths.get(DTM_DIRECTORY, "orig_"+lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
-        err.println("-- laz2dtm: " + lazFile);
+        err.println("-- laz2dtm: " + lasFile);
         try {
-            String cmd = "pdal pipeline laz2dtm.json --readers.las.filename="+lazFile+" --writers.gdal.filename="+dtmOrigFile+" --writers.gdal.bounds="+bounds;
+            String cmd = "pdal pipeline laz2dtm.json --readers.las.filename="+lasFile+" --writers.gdal.filename="+dtmOrigFile+" --writers.gdal.bounds="+bounds;
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
@@ -216,7 +216,7 @@ public class preprocess {
             }
             
             if (p.exitValue() != 0) {
-                err.println("Error while processing: " + lazFile);
+                err.println("Error while processing: " + lasFile);
             }
         } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -295,7 +295,7 @@ public class preprocess {
         String nDsmBuildingsFile = Paths.get(NDSM_BUILDINGS_DIRECTORY, lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
         err.println("-- ndsm buildings");
         try {
-            String cmd = "pdal pipeline laz2buildings.json --readers.las.filename="+lazFile+" --writers.gdal.filename="+nDsmBuildingsFile+" --writers.gdal.bounds="+bounds;
+            String cmd = "pdal pipeline laz2buildings.json --readers.las.filename="+lasFile+" --writers.gdal.filename="+nDsmBuildingsFile+" --writers.gdal.bounds="+bounds;
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
@@ -308,7 +308,7 @@ public class preprocess {
             }
             
             if (p.exitValue() != 0) {
-                err.println("Error while processing: " + lazFile);
+                err.println("Error while processing: " + lasFile);
             }
         } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -318,7 +318,7 @@ public class preprocess {
         String nDsmVegetationFile = Paths.get(NDSM_VEGETATION_DIRECTORY, lasFileName.replace(".las", ".tif")).toFile().getAbsolutePath();
         err.println("-- ndsm vegetation");
         try {
-            String cmd = "pdal pipeline laz2vegetation.json --readers.las.filename="+lazFile+" --writers.gdal.filename="+nDsmVegetationFile+" --writers.gdal.bounds="+bounds;
+            String cmd = "pdal pipeline laz2vegetation.json --readers.las.filename="+lasFile+" --writers.gdal.filename="+nDsmVegetationFile+" --writers.gdal.bounds="+bounds;
             err.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
@@ -331,7 +331,7 @@ public class preprocess {
             }
             
             if (p.exitValue() != 0) {
-                err.println("Error while processing: " + lazFile);
+                err.println("Error while processing: " + lasFile);
             }
         } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -340,7 +340,7 @@ public class preprocess {
 
         Files.delete(Paths.get(zipFile.getAbsolutePath()));
         Files.delete(Paths.get(lasFile));
-        Files.delete(Paths.get(lazFile));
+        // Files.delete(Paths.get(lazFile));
         Files.delete(Paths.get(dsmOrigFile));
         Files.delete(Paths.get(dsmFillNoDataUncompressedFile));
         Files.delete(Paths.get(dtmFillNoDataUncompressedFile));
