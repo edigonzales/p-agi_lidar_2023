@@ -1,5 +1,7 @@
 # LiDAR
 
+Berechnungen verschiedener Produkte aus den rohen LiDAR-Daten. Einzig die nDTM (Gebäude und Vegetation) sind produktionsreif.
+
 
 Linux: https://docs.anaconda.com/free/miniconda/
 

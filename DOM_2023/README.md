@@ -1,4 +1,6 @@
-# LiDAR
+# DOM
+
+Berechnen der Schattenbilder aus swissSURFACE3D-Raster.
 
 
 Linux: https://docs.anaconda.com/free/miniconda/
