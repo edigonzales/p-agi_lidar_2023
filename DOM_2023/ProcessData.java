@@ -28,6 +28,7 @@ public class ProcessData {
 
 
     static final String CSV_FILE_NAME = "ch.swisstopo.swisssurface3d-raster-LL3uCeEV.csv";
+    //static final String CSV_FILE_NAME = "ch.swisstopo.swisssurface3d-raster-errors.csv";
     static final String TMP_DIRECTORY = "/tmp/";
     static final String TIF_DIRECTORY = "/tmp/tif/";
     static final String RELIEF_DIRECTORY = "/tmp/relief/";
@@ -70,40 +71,40 @@ public class ProcessData {
     private static void makeitso(String fileLocation) throws IOException, URISyntaxException {
         String fileName = fileLocation.substring(fileLocation.lastIndexOf("/")+1);
         // String tifFileName = fileName.substring(20,29).replace("-", "_")+".tif";
-        err.println("-- Download: " + fileLocation);
+        out.println("-- Download: " + fileLocation);
         URI uri = new URI(fileLocation);
         File tifFile = Paths.get(TIF_DIRECTORY).resolve(fileName).toFile();
-        ReadableByteChannel readableByteChannel = Channels.newChannel(uri.toURL().openStream());
-        try(FileOutputStream fileOutputStream = new FileOutputStream(tifFile);) {
-            FileChannel fileChannel = fileOutputStream.getChannel();
-            fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);    
-        }
+        // ReadableByteChannel readableByteChannel = Channels.newChannel(uri.toURL().openStream());
+        // try(FileOutputStream fileOutputStream = new FileOutputStream(tifFile);) {
+        //     FileChannel fileChannel = fileOutputStream.getChannel();
+        //     fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);    
+        // }
 
-        err.println(tifFile);
+        out.println(tifFile);
 
         String reliefFile = Paths.get(RELIEF_DIRECTORY, tifFile.getName()).toAbsolutePath().toString();
-        err.println(reliefFile);
+        out.println(reliefFile);
 
-        err.println("-- hillshade dom");
+        out.println("-- hillshade dom");
         try {
-            String cmd = "gdaldem hillshade "+tifFile.getAbsolutePath().toString()+" "+reliefFile+" -compute_edges -multidirectional -alt 55 -co TILED=YES -co COMPRESS=DEFLATE -co PREDICTOR=2";
-            err.println(cmd);
+            String cmd = "gdaldem hillshade "+tifFile.getAbsolutePath().toString()+" "+reliefFile+" -compute_edges -co TILED=YES -co COMPRESS=DEFLATE -co PREDICTOR=2";
+            out.println(cmd);
             ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
             Process p = pb.start();
             {
                 BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
                 String line = null;
                 while ((line = is.readLine()) != null)
-                    err.println(line);
+                    out.println(line);
                 p.waitFor();
             }
             
             if (p.exitValue() != 0) {
-                err.println("Error while processing: " + tifFile.toString());
+                out.println("Error while processing: " + tifFile.toString());
             }
         } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
-                err.println(e.getMessage());
+                out.println(e.getMessage());
         }
         
         // Files.delete(Paths.get(zipFile.getAbsolutePath()));

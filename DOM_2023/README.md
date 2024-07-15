@@ -6,18 +6,18 @@ Berechnen der Schattenbilder aus swissSURFACE3D-Raster.
 Linux: https://docs.anaconda.com/free/miniconda/
 
 ```
-conda create --name pdal-java
+conda create --name pdal
 ```
 
 ```
-conda activate pdal-java
+conda activate pdal
 ```
 
 ```
-conda install -c conda-forge pdal=2.6.2 python-pdal gdal
+conda install -c conda-forge pdal python-pdal gdal
 ```
 ```
-conda install -c conda-forge pdal=2.6.3 python-pdal gdal
+conda install -c conda-forge pdal python-pdal gdal
 ```
 
 ```
