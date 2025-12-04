@@ -144,9 +144,9 @@ def process_tiles(dem_path: str,
 
     Randkacheln:
     - Wenn der Buffer ins Leere geht (außerhalb des DEMs), wird das Fenster
-      beim Zuschneiden geclippt.
+      beim Zuschneiden an das Dataset geclippt.
     - Der innere Ausschnitt (1km) wird per Bounding Box über from_bounds
-      aus dem SVF extrahiert, d.h. keine symmetrische Pixel-Subtraktion mehr.
+      aus dem SVF extrahiert.
     """
     ensure_out_dir(out_dir)
 
@@ -161,6 +161,8 @@ def process_tiles(dem_path: str,
         pixel_size_y = -transform.e  # e ist normalerweise negativ
 
         logging.info(f"Pixelgröße: {pixel_size_x} x {pixel_size_y} (m)")
+
+        full_dem_window = Window(0, 0, src.width, src.height)
 
         # CSV Zeile für Zeile durchgehen (eine Spalte pro Zeile)
         with open(csv_path, newline="", encoding="utf-8") as f:
@@ -203,9 +205,18 @@ def process_tiles(dem_path: str,
                     f"Tile {tile_id}: bbox mit Buffer: ({x_min}, {y_min}) - ({x_max}, {y_max})"
                 )
 
-                # Rasterio-Fenster für diese gebufferte Bounding Box (wird intern an DEM geclippt)
+                # Fenster für die gebufferte Bounding Box
                 window_buf: Window = from_bounds(x_min, y_min, x_max, y_max, transform=transform)
                 window_buf = window_buf.round_offsets().round_lengths()
+
+                # *** WICHTIGER FIX: an Dataset-Fenster clippen, damit Offsets nicht negativ werden ***
+                window_buf = window_buf.intersection(full_dem_window)
+
+                if window_buf.width <= 0 or window_buf.height <= 0:
+                    logging.warning(
+                        f"Tile {tile_id}: gebuffertes Fenster liegt komplett außerhalb des DEMs, überspringe."
+                    )
+                    continue
 
                 # DEM-Ausschnitt lesen
                 dem_buf = src.read(1, window=window_buf)
@@ -248,15 +259,16 @@ def process_tiles(dem_path: str,
                         transform_svf_buf = src_svf.transform
                         svf_nodata = src_svf.nodata
 
+                        full_svf_window = Window(0, 0, src_svf.width, src_svf.height)
+
                         # Fenster für die "core" 1km-Kachel im gebufferten SVF
                         window_inner: Window = from_bounds(
                             x_min_core, y_min_core, x_max_core, y_max_core, transform=transform_svf_buf
                         )
                         window_inner = window_inner.round_offsets().round_lengths()
 
-                        # Sicherstellen, dass Fenster innerhalb des Rasters liegt
-                        full_window = Window(0, 0, src_svf.width, src_svf.height)
-                        window_inner = window_inner.intersection(full_window)
+                        # Sicherstellen, dass Fenster innerhalb des SVF-Rasters liegt
+                        window_inner = window_inner.intersection(full_svf_window)
 
                         if window_inner.width <= 0 or window_inner.height <= 0:
                             logging.error(
